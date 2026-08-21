@@ -19,6 +19,18 @@ services.AddRedisSemaphoreAsScoped();
 
 `AddRedisSemaphoreAsSingleton()` is also available. Both registrations add `Soenneker.Redis.Util` and its dependencies.
 
+Logging is disabled by default. Enable Redis logging through configuration:
+
+```json
+{
+  "Azure": {
+    "Redis": {
+      "Log": true
+    }
+  }
+}
+```
+
 ## Usage
 
 Try to acquire a permit without waiting:

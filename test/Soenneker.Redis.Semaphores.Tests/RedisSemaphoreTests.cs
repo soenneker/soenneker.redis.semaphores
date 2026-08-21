@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using AwesomeAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Soenneker.Asyncs.Locks;
 using Soenneker.Extensions.ValueTask;
@@ -14,11 +15,12 @@ namespace Soenneker.Redis.Semaphores.Tests;
 
 public sealed class RedisSemaphoreTests
 {
+    private static readonly IConfiguration _config = new ConfigurationBuilder().Build();
     private readonly IRedisSemaphore _semaphore;
 
     public RedisSemaphoreTests()
     {
-        _semaphore = new RedisSemaphore(CreateRedisUtil(), NullLogger<RedisSemaphore>.Instance);
+        _semaphore = new RedisSemaphore(_config, CreateRedisUtil(), NullLogger<RedisSemaphore>.Instance);
     }
 
     [Test]
@@ -168,7 +170,7 @@ public sealed class RedisSemaphoreTests
     [Test]
     public async Task Failed_renewal_should_signal_permit_loss(CancellationToken cancellationToken)
     {
-        var semaphore = new RedisSemaphore(CreateRedisUtil(renewalsSucceed: false), NullLogger<RedisSemaphore>.Instance);
+        var semaphore = new RedisSemaphore(_config, CreateRedisUtil(renewalsSucceed: false), NullLogger<RedisSemaphore>.Instance);
         var options = new RedisSemaphoreOptions
         {
             LeaseDuration = TimeSpan.FromMilliseconds(150),

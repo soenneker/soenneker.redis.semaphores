@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
@@ -19,11 +20,13 @@ public sealed class RedisSemaphore : IRedisSemaphore
 
     private readonly IRedisUtil _redisUtil;
     private readonly ILogger<RedisSemaphore> _logger;
+    private readonly bool _log;
 
-    public RedisSemaphore(IRedisUtil redisUtil, ILogger<RedisSemaphore> logger)
+    public RedisSemaphore(IConfiguration config, IRedisUtil redisUtil, ILogger<RedisSemaphore> logger)
     {
         _redisUtil = redisUtil;
         _logger = logger;
+        _log = config.GetValue<bool>("Azure:Redis:Log");
     }
 
     public ValueTask<RedisSemaphoreHandle?> TryAcquire(string semaphoreName, int maxCount, RedisSemaphoreOptions? options = null,
@@ -53,7 +56,7 @@ public sealed class RedisSemaphore : IRedisSemaphore
             if (!acquired)
                 continue;
 
-            if (_logger.IsEnabled(LogLevel.Debug))
+            if (_log && _logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Acquired Redis semaphore permit ({semaphoreName}, slot {slot})", semaphoreName, slot);
 
             var handle = new RedisSemaphoreHandle(this, semaphoreName, slot, permitKey, permitToken, settings, acquisitionStartedTimestamp);
@@ -61,7 +64,7 @@ public sealed class RedisSemaphore : IRedisSemaphore
             return handle;
         }
 
-        if (_logger.IsEnabled(LogLevel.Debug))
+        if (_log && _logger.IsEnabled(LogLevel.Debug))
             _logger.LogDebug("No permits are available for Redis semaphore ({semaphoreName})", semaphoreName);
 
         return null;
@@ -116,7 +119,8 @@ public sealed class RedisSemaphore : IRedisSemaphore
     public async ValueTask ForceReleaseAll(string semaphoreName, int maxCount, CancellationToken cancellationToken = default)
     {
         ValidateNameAndCount(semaphoreName, maxCount);
-        _logger.LogWarning("Forcibly releasing all permits for Redis semaphore ({semaphoreName})", semaphoreName);
+        if (_log)
+            _logger.LogWarning("Forcibly releasing all permits for Redis semaphore ({semaphoreName})", semaphoreName);
 
         for (var slot = 0; slot < maxCount; slot++)
         {
@@ -130,7 +134,7 @@ public sealed class RedisSemaphore : IRedisSemaphore
     {
         bool released = await _redisUtil.RemoveIfEqual(permitKey, permitToken, cancellationToken).NoSync();
 
-        if (_logger.IsEnabled(LogLevel.Debug))
+        if (_log && _logger.IsEnabled(LogLevel.Debug))
         {
             if (released)
                 _logger.LogDebug("Released Redis semaphore permit ({semaphoreName}, slot {slot})", semaphoreName, slot);
@@ -148,11 +152,17 @@ public sealed class RedisSemaphore : IRedisSemaphore
         return _redisUtil.ExpireIfEqual(permitKey, permitToken, leaseDuration, cancellationToken);
     }
 
-    internal void LogPermitLost(string semaphoreName, int slot) =>
-        _logger.LogWarning("Lost ownership of Redis semaphore permit ({semaphoreName}, slot {slot})", semaphoreName, slot);
+    internal void LogPermitLost(string semaphoreName, int slot)
+    {
+        if (_log)
+            _logger.LogWarning("Lost ownership of Redis semaphore permit ({semaphoreName}, slot {slot})", semaphoreName, slot);
+    }
 
-    internal void LogRenewalFailure(Exception exception, string semaphoreName, int slot) =>
-        _logger.LogError(exception, "Redis semaphore renewal loop failed ({semaphoreName}, slot {slot})", semaphoreName, slot);
+    internal void LogRenewalFailure(Exception exception, string semaphoreName, int slot)
+    {
+        if (_log)
+            _logger.LogError(exception, "Redis semaphore renewal loop failed ({semaphoreName}, slot {slot})", semaphoreName, slot);
+    }
 
     private static string BuildPermitKey(string semaphoreName, int slot) => $"{{{semaphoreName}}}:semaphore:{slot}";
 

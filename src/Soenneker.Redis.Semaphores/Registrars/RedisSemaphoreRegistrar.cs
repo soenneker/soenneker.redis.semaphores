@@ -13,6 +13,8 @@ public static class RedisSemaphoreRegistrar
     /// <summary>
     /// Adds <see cref="IRedisSemaphore"/> as a singleton service. <para/>
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddRedisSemaphoreAsSingleton(this IServiceCollection services)
     {
         services.AddRedisUtilAsSingleton()
@@ -24,6 +26,8 @@ public static class RedisSemaphoreRegistrar
     /// <summary>
     /// Adds <see cref="IRedisSemaphore"/> as a scoped service. <para/>
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddRedisSemaphoreAsScoped(this IServiceCollection services)
     {
         services.AddRedisUtilAsScoped()

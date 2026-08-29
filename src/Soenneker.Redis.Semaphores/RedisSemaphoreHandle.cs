@@ -64,6 +64,8 @@ public sealed class RedisSemaphoreHandle : IAsyncDisposable
     /// <summary>
     /// Atomically renews this permit only if it is still owned by this handle.
     /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>true if atomically renews this permit only if it is still owned by this handle; otherwise, false.</returns>
     public async ValueTask<bool> Renew(CancellationToken cancellationToken = default)
     {
         if (_disposed.Read() || IsPermitLost)

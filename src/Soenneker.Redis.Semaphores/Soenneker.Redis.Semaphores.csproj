@@ -43,7 +43,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Soenneker.Atomics.ValueBools" Version="4.0.35" />
+        <PackageReference Include="Soenneker.Atomics.ValueBools" Version="4.0.38" />
         <PackageReference Include="Soenneker.Extensions.Task" Version="4.0.127" />
         <PackageReference Include="Soenneker.Extensions.ValueTask" Version="4.0.118" />
         <PackageReference Include="Soenneker.Redis.Util" Version="4.0.5365" />

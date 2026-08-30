@@ -153,9 +153,14 @@ public sealed class RedisSemaphoreHandle : IAsyncDisposable
         if (_renewalTask is not null)
             await _renewalTask.NoSync();
 
-        _ = await _semaphore.Release(SemaphoreName, Slot, _permitKey, PermitToken, CancellationToken.None).NoSync();
-
-        _renewalCancellation.Dispose();
-        _permitLostCancellation.Dispose();
+        try
+        {
+            _ = await _semaphore.Release(SemaphoreName, Slot, _permitKey, PermitToken, CancellationToken.None).NoSync();
+        }
+        finally
+        {
+            _renewalCancellation.Dispose();
+            _permitLostCancellation.Dispose();
+        }
     }
 }

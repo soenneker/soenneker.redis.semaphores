@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Soenneker.Redis.Semaphores.Abstract;
 
 /// <summary>
-/// A utility library providing distributed semaphores backed by Redis.
+/// Coordinates a bounded number of distributed permit holders through Redis leases.
 /// </summary>
 public interface IRedisSemaphore
 {
@@ -35,9 +35,9 @@ public interface IRedisSemaphore
     /// Gets the number of permits currently in use for a named semaphore.
     /// </summary>
     /// <param name="semaphoreName">Name of the semaphore to target.</param>
-    /// <param name="maxCount">Max Count for the get acquired count operation.</param>
+    /// <param name="maxCount">The number of permit slots used by this semaphore.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task whose result is the requested value.</returns>
+    /// <returns>The number of permit keys that exist at the time of the call.</returns>
     ValueTask<int> GetAcquiredCount(string semaphoreName, int maxCount, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -46,14 +46,14 @@ public interface IRedisSemaphore
     /// <param name="semaphoreName">Name of the semaphore to target.</param>
     /// <param name="maxCount">The maximum number of permits used by callers of this semaphore.</param>
     /// <param name="cancellationToken">A token to observe while inspecting Redis.</param>
-    /// <returns>A task whose result is the requested redis Semaphore Status.</returns>
+    /// <returns>The point-in-time capacity snapshot.</returns>
     ValueTask<RedisSemaphoreStatus> GetStatus(string semaphoreName, int maxCount, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Forcibly removes all permit slots for a named semaphore.
     /// </summary>
     /// <param name="semaphoreName">Name of the semaphore to target.</param>
-    /// <param name="maxCount">Max Count for the force release all operation.</param>
+    /// <param name="maxCount">The number of permit slots to remove.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the force release all operation is complete.</returns>
     /// <remarks>This operation ignores ownership and should only be used for administrative recovery.</remarks>

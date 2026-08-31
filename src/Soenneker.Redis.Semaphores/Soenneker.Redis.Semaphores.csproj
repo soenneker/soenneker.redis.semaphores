@@ -46,7 +46,7 @@
         <PackageReference Include="Soenneker.Atomics.ValueBools" Version="4.0.38" />
         <PackageReference Include="Soenneker.Extensions.Task" Version="4.0.128" />
         <PackageReference Include="Soenneker.Extensions.ValueTask" Version="4.0.120" />
-        <PackageReference Include="Soenneker.Redis.Util" Version="4.0.5386" />
+        <PackageReference Include="Soenneker.Redis.Util" Version="4.0.5387" />
         <PackageReference Include="Soenneker.Utils.Random" Version="4.0.130" />
     </ItemGroup>
 </Project>

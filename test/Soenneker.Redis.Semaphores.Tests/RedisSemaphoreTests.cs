@@ -137,9 +137,9 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task Semaphore_name_with_hash_tag_braces_should_be_rejected()
+    public async Task Semaphore_name_with_hash_tag_braces_should_be_rejected(CancellationToken cancellationToken)
     {
-        Func<Task> action = async () => await _semaphore.TryAcquire("jobs:{invalid}", 1);
+        Func<Task> action = async () => await _semaphore.TryAcquire("jobs:{invalid}", 1, cancellationToken: cancellationToken);
 
         await action.Should().ThrowAsync<ArgumentException>();
     }

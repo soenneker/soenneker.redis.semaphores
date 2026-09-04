@@ -12,6 +12,7 @@ using Soenneker.Utils.Random;
 
 namespace Soenneker.Redis.Semaphores;
 
+/// <inheritdoc cref="IRedisSemaphore" />
 public sealed class RedisSemaphore : IRedisSemaphore
 {
     private static readonly RedisSemaphoreSettings _defaultSettings = new(TimeSpan.FromMinutes(1), TimeSpan.FromMilliseconds(100), true,

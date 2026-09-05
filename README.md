@@ -121,3 +121,20 @@ RedisSemaphoreStatus status = await semaphore.GetStatus(
 ```
 
 The result is a point-in-time snapshot. Permit state can change immediately after it is read.
+
+## Explicitly managed permits
+
+For durable workers that already renew their own leases, use the explicit-database API without starting a second renewal loop:
+
+```csharp
+RedisSemaphorePermit? permit = await RedisSemaphore.TryAcquirePermit(
+    database, "flywheel:{namespace}:function:imports", 4, TimeSpan.FromMinutes(1), cancellationToken);
+```
+
+The returned permit contains its key and owner token. `RenewPermit` and `ReleasePermit` use the strict atomic helpers in `Soenneker.Redis.Util` and propagate connection failures. For a transaction that updates dependent state, add `permit.OwnershipCondition` to `RedisAtomicTransaction`, then queue renewal or deletion of `permit.Key` in that same transaction. This prevents a stale owner from updating dependent state after losing its permit.
+
+The key prefix is fully qualified and may carry a Redis Cluster hash tag; the caller must place dependent transaction keys in the same slot. Permits expire if abandoned, and no handle disposal or background timer is required. A failed/ambiguous acquisition can leave a permit until expiry. Do not release a permit after an unknown dependent commit outcome unless that operation's recovery protocol proves it is safe.
+
+All acquisitions must agree on `maxCount`. Applications supporting runtime limit changes must coordinate them with existing executions; changing the slot count alone cannot safely lower a limit while higher slots are occupied.
+
+Local development references the sibling `soenneker.redis.util` project for its new atomics. Coordinate the Util package release and package dependency version before publishing Semaphores. The `RedisSemaphorePermitTests` use `REDIS_TEST_CONNECTION` (or `FLYWHEEL_TEST_REDIS`), defaulting to localhost:6379.

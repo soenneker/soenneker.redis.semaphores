@@ -24,7 +24,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task TryAcquire_should_enforce_max_count(CancellationToken cancellationToken)
+    public async ValueTask TryAcquire_should_enforce_max_count(CancellationToken cancellationToken)
     {
         string name = CreateName();
 
@@ -42,7 +42,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task Disposing_handle_should_release_permit(CancellationToken cancellationToken)
+    public async ValueTask Disposing_handle_should_release_permit(CancellationToken cancellationToken)
     {
         string name = CreateName();
 
@@ -58,7 +58,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task Expired_handle_should_not_release_new_owner(CancellationToken cancellationToken)
+    public async ValueTask Expired_handle_should_not_release_new_owner(CancellationToken cancellationToken)
     {
         string name = CreateName();
 
@@ -78,7 +78,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task Acquire_should_wait_until_permit_is_released(CancellationToken cancellationToken)
+    public async ValueTask Acquire_should_wait_until_permit_is_released(CancellationToken cancellationToken)
     {
         string name = CreateName();
 
@@ -99,7 +99,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task ForceReleaseAll_should_clear_every_permit(CancellationToken cancellationToken)
+    public async ValueTask ForceReleaseAll_should_clear_every_permit(CancellationToken cancellationToken)
     {
         string name = CreateName();
 
@@ -115,7 +115,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task GetStatus_should_report_distributed_capacity(CancellationToken cancellationToken)
+    public async ValueTask GetStatus_should_report_distributed_capacity(CancellationToken cancellationToken)
     {
         string name = CreateName();
 
@@ -137,7 +137,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task Semaphore_name_with_hash_tag_braces_should_be_rejected(CancellationToken cancellationToken)
+    public async ValueTask Semaphore_name_with_hash_tag_braces_should_be_rejected(CancellationToken cancellationToken)
     {
         Func<Task> action = async () => await _semaphore.TryAcquire("jobs:{invalid}", 1, cancellationToken: cancellationToken);
 
@@ -145,7 +145,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task Automatic_renewal_should_keep_long_running_permit(CancellationToken cancellationToken)
+    public async ValueTask Automatic_renewal_should_keep_long_running_permit(CancellationToken cancellationToken)
     {
         string name = CreateName();
         var options = new RedisSemaphoreOptions
@@ -168,7 +168,7 @@ public sealed class RedisSemaphoreTests
     }
 
     [Test]
-    public async Task Failed_renewal_should_signal_permit_loss(CancellationToken cancellationToken)
+    public async ValueTask Failed_renewal_should_signal_permit_loss(CancellationToken cancellationToken)
     {
         var semaphore = new RedisSemaphore(_config, CreateRedisUtil(renewalsSucceed: false), NullLogger<RedisSemaphore>.Instance);
         var options = new RedisSemaphoreOptions

@@ -8,7 +8,7 @@ namespace Soenneker.Redis.Semaphores.Tests;
 public sealed class RedisSemaphorePermitTests
 {
     [Test]
-    public async Task ExplicitPermitsEnforceCapacityAndFenceSuccessors()
+    public async ValueTask ExplicitPermitsEnforceCapacityAndFenceSuccessors()
     {
         using var connection = await ConnectionMultiplexer.ConnectAsync(Environment.GetEnvironmentVariable("REDIS_TEST_CONNECTION") ?? Environment.GetEnvironmentVariable("FLYWHEEL_TEST_REDIS") ?? "localhost:6379");
         var db = connection.GetDatabase();
